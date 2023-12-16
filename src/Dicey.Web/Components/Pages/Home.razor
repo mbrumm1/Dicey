@@ -1,0 +1,109 @@
+﻿@page "/"
+@using Dicey.Web.Models
+
+<PageTitle>Home</PageTitle>
+
+<div class="dice-set-container">
+    <div class="dice-set-header">
+        <input type="text" placeholder="Set Name" @bind="_setName" />
+        <button type="button" @onclick="SaveSet">Save Set</button>
+    </div>
+    <div class="dice-set">
+        @foreach (var die in _dice)
+        {
+
+            <div class="die d-@die.Sides">
+                @die.Value
+                <div class="remove-dice-button" @onclick="() => RemoveDie(die)">x</div>
+            </div>
+
+        }
+    </div>
+    <div class="total">Total: @_dice.Sum(x => x.Value)</div>
+    @if (_dice.Count > 0)
+    {
+        <div class="total">Min: @_dice.Min(x => x.Value)</div>
+        <div class="total">Max: @_dice.Max(x => x.Value)</div>
+        <div class="total">Average: @_dice.Average(x => x.Value).ToString("0.00")</div>
+    }
+</div>
+
+<div class="dice-sets">
+    @foreach (var set in _sets)
+    {
+        <p>@set.Name</p>
+    }
+</div>
+
+<DiceDrawer OnDieSelected="DieSelected" />
+<button type="button" @onclick="Roll">Roll</button>
+<button type="button" @onclick="Reset">Reset</button>
+<button type="button" @onclick="Clear">Clear</button>
+
+<div>
+    <svg @onclick="Test" width="50" height="50">
+        <path d="M 25 0 L 50 50 L 0 50 z" stroke="black" fill="green" />
+        <text x="25" y="40" font-size="16" text-anchor="middle" fill="black" font-weight="bolder">4</text>
+    </svg>
+</div>
+<p>@_testMessage</p>
+
+@code {
+    private string? _testMessage;
+
+    private void Test()
+    {
+        _testMessage = "Testing...";
+    }
+
+    private List<Die> _dice = new();
+    private const int _maxDice = 30;
+    private List<DiceSet> _sets = new List<DiceSet>();
+    private string? _setName;
+
+    private void DieSelected(Die die)
+    {
+        if (_dice.Count < _maxDice)
+        {
+            _dice.Add(die);
+        }
+    }
+
+    private Random _random = new Random();
+
+    private void Roll()
+    {
+        foreach (var die in _dice)
+        {
+            die.Value = _random.Next(die.Sides) + 1;
+        }
+    }
+
+    private void Reset()
+    {
+        foreach (var die in _dice)
+        {
+            die.Reset();
+        }
+    }
+
+    private void Clear()
+    {
+        _dice = new List<Die>();
+    }
+
+    private void RemoveDie(Die die)
+    {
+        _dice.Remove(die);
+    }
+
+    private void SaveSet()
+    {
+        var set = new DiceSet();
+        set.Name = _setName ?? "Name";
+        set.Dice = _dice
+            .Select(x => new Die { Sides = x.Sides, Value = x.Sides })
+            .ToList();
+        _sets.Add(set);
+    }
+}

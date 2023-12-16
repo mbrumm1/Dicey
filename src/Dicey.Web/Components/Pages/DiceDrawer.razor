@@ -1,0 +1,29 @@
+﻿@using Dicey.Web.Models
+
+<div class="dice-drawer">
+    @foreach (var die in _dice)
+    {
+        <div @onclick="() => DieSelected(die)" class="die d-@die.Sides">
+            @die.Sides
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public EventCallback<Die> OnDieSelected { get; set; }
+
+    private Die[] _dice = new[]
+    {
+        new Die { Sides = 4, Value = 4 },
+        new Die { Sides = 6, Value = 6 },
+        new Die { Sides = 8, Value = 8 },
+        new Die { Sides = 10, Value = 10 },
+        new Die { Sides = 12, Value = 12 },
+        new Die { Sides = 20, Value = 20 },
+    };
+
+    private void DieSelected(Die die)
+    {
+        OnDieSelected.InvokeAsync(new Die { Sides = die.Sides, Value = die.Value });        
+    }
+}
